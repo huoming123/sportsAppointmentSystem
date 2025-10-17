@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.design.sportsAppointment.mapper.SportsEquipmentMapper">
+
+    <resultMap type="com.design.sportsAppointment.pojo.SportsEquipment" id="SportsEquipmentMap">
+        <result property="id" column="id" jdbcType="INTEGER"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="images" column="images" jdbcType="VARCHAR"/>
+        <result property="createdAt" column="created_at" jdbcType="TIMESTAMP"/>
+        <result property="createdBy" column="created_by" jdbcType="VARCHAR"/>
+        <result property="descb" column="descb" jdbcType="VARCHAR"/>
+        <result property="prices" column="prices" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="SportsEquipmentMap">
+        select
+          *
+        from sports_equipment
+        where id = #{id}
+    </select>
+
+
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="id" useGeneratedKeys="true">
+        insert into sports_equipment(name, images, created_at, created_by, descb,prices,total)
+        values (#{name}, #{images}, now(), #{createdBy}, #{descb},#{prices},#{total})
+    </insert>
+        <!--用select进行分页查询-->
+      <select id="getPageListByCondition" resultMap="SportsEquipmentMap">
+        select *  from sports_equipment where created_at is not null
+          <!--器材名称搜索 不为空 则进入搜索条件-->
+          <if test="page.key.name != null and page.key.name != ''">
+              and  name like '%' #{page.key.name} '%'
+          </if>
+            <!--排序 desc是降序-->
+        order by
+        created_at desc
+        <!--分页查询-->
+      
+        limit  #{page.startNum} , #{page.pageSize}
+    </select>
+     <!--分页查询条数-->
+    <select id="getPageListCount" resultType="int">
+        select count(id) as count from sports_equipment where created_at is not null
+        <!--器材名称搜索 不为空 则进入搜索条件-->
+        <if test="page.key.name != null and page.key.name != ''">
+            and  name like '%' #{page.key.name} '%'
+        </if>
+    </select>
+
+   
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update sports_equipment
+        <set>
+            <if test="name != null and name != ''">
+                name = #{name},
+            </if>
+            <if test="images != null and images != ''">
+                images = #{images},
+            </if>
+            <if test="createdAt != null">
+                created_at = #{createdAt},
+            </if>
+            <if test="createdBy != null and createdBy != ''">
+                created_by = #{createdBy},
+            </if>
+            <if test="descb != null and descb != ''">
+                descb = #{descb},
+            </if>
+            <if test="prices != null">
+                prices = #{prices},
+            </if>
+            <if test="total != null">
+                total = #{total},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete from sports_equipment where id = #{id}
+    </delete>
+    <!--根据器材名称查找数据-->
+    <select id="getByName" resultMap="SportsEquipmentMap">
+        select * from sports_equipment where  name = #{name};
+    </select>
+</mapper>
+

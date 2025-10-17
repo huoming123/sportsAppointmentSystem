@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.design.sportsAppointment.mapper.RentMapper">
+
+    <resultMap type="com.design.sportsAppointment.pojo.Rent" id="RentMap">
+        <result property="id" column="id" jdbcType="INTEGER"/>
+        <result property="createdAt" column="created_at" jdbcType="TIMESTAMP"/>
+        <result property="createdBy" column="created_by" jdbcType="VARCHAR"/>
+        <result property="num" column="num" jdbcType="INTEGER"/>
+        <result property="goBack" column="go_back" jdbcType="INTEGER"/>
+        <result property="fee" column="fee" jdbcType="NUMERIC"/>
+        <result property="status" column="status" jdbcType="INTEGER"/>
+        <result property="deletedAt" column="deleted_at" jdbcType="TIMESTAMP"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="RentMap">
+        select
+          *
+        from rent
+        where id = #{id}
+    </select>
+
+
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="id" useGeneratedKeys="true">
+        insert into rent(created_at, created_by, num, fee, status, deleted_at, name,go_back)
+        values (now(), #{createdBy}, #{num}, #{fee}, #{status}, #{deletedAt}, #{name},#{goBack})
+    </insert>
+        <!--用select进行分页查询-->
+      <select id="getPageListByCondition" resultMap="RentMap">
+        select *  from rent where created_at is not  null
+          <!--租借人搜索 不为空 则进入搜索条件-->
+          <if test="page.key.createdBy != null and page.key.createdBy != ''">
+              and  created_by like '%' #{page.key.createdBy} '%'
+          </if>
+            <!--排序 desc是降序-->
+        order by
+        created_at desc
+        <!--分页查询-->
+      
+        limit  #{page.startNum} , #{page.pageSize}
+    </select>
+     <!--分页查询条数-->
+    <select id="getPageListCount" resultType="int">
+        select count(id) as count from rent where created_at is not  null
+        <!--租借人搜索 不为空 则进入搜索条件-->
+        <if test="page.key.createdBy != null and page.key.createdBy != ''">
+            and  created_by like '%' #{page.key.createdBy} '%'
+        </if>
+    </select>
+
+   
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update rent
+        <set>
+            <if test="createdAt != null">
+                created_at = #{createdAt},
+            </if>
+            <if test="createdBy != null and createdBy != ''">
+                created_by = #{createdBy},
+            </if>
+            <if test="num != null">
+                num = #{num},
+            </if>
+            <if test="fee != null">
+                fee = #{fee},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="deletedAt != null">
+                deleted_at = #{deletedAt},
+            </if>
+            <if test="goBack != null">
+                go_back = #{goBack},
+            </if>
+            <if test="name != null and name != ''">
+                name = #{name},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete from rent where id = #{id}
+    </delete>
+    <!--取消器材租借-->
+    <update id="cancel">
+        update rent set deleted_at = now() , status=-1 where id =#{id}
+    </update>
+    <!--器材租借统分析-->
+    <select id="getRentTotalAnalyse" resultMap="RentMap">
+        select name, SUM(fee) as sum from rent where status = 1
+        <!--年份搜索 不为空 则进入搜索条件-->
+        <if test="yearMonth == null or yearMonth ==''">
+            <bind name="pattern" value="'%' + year + '%'" />
+            and created_at like #{pattern}
+        </if>
+        <!--年份月份搜索 不为空 则进入搜索条件-->
+        <if test="yearMonth != null and yearMonth !=''">
+            <bind name="pattern" value="'%' + yearMonth + '%'" />
+            and created_at like #{pattern}
+        </if>
+        group by name
+    </select>
+
+</mapper>
+

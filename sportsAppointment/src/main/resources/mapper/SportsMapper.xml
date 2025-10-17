@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.design.sportsAppointment.mapper.SportsMapper">
+
+    <resultMap type="com.design.sportsAppointment.pojo.Sports" id="SportsMap">
+        <result property="id" column="id" jdbcType="INTEGER"/>
+        <result property="sportsName" column="sports_name" jdbcType="VARCHAR"/>
+        <result property="address" column="address" jdbcType="VARCHAR"/>
+        <result property="createdAt" column="created_at" jdbcType="TIMESTAMP"/>
+        <result property="images" column="images" jdbcType="VARCHAR"/>
+        <result property="createdBy" column="created_by" jdbcType="VARCHAR"/>
+        <result property="startTime" column="start_time" jdbcType="VARCHAR"/>
+        <result property="endTime" column="end_time" jdbcType="VARCHAR"/>
+
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="SportsMap">
+        select
+          id, sports_name, address, created_at, images, created_by, start_time, end_time
+        from sports
+        where id = #{id}
+    </select>
+
+
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="id" useGeneratedKeys="true">
+        insert into sports(sports_name, address, created_at, images, created_by, start_time, end_time)
+        values (#{sportsName}, #{address}, now(), #{images}, #{createdBy}, #{startTime}, #{endTime})
+    </insert>
+        <!--用select进行分页查询-->
+      <select id="getPageListByCondition" resultMap="SportsMap">
+        select *  from sports where created_at is not null
+          <!--体育馆搜索 不为空 则进入搜索条件-->
+          <if test="page.key.sportsName != null and page.key.sportsName != ''">
+              and  sports_name like '%' #{page.key.sportsName} '%'
+          </if>
+          <!--地址搜索 不为空 则进入搜索条件-->
+          <if test="page.key.address != null and page.key.address != ''">
+              and  address like '%' #{page.key.address} '%'
+          </if>
+            <!--排序 desc是降序-->
+        order by
+        created_at desc
+        <!--分页查询-->
+      
+        limit  #{page.startNum} , #{page.pageSize}
+    </select>
+     <!--分页查询条数-->
+    <select id="getPageListCount" resultType="int">
+        select count(id) as count from sports where created_at is not null
+        <!--体育馆搜索 不为空 则进入搜索条件-->
+        <if test="page.key.sportsName != null and page.key.sportsName != ''">
+            and  sports_name like '%' #{page.key.sportsName} '%'
+        </if>
+        <!--地址搜索 不为空 则进入搜索条件-->
+        <if test="page.key.address != null and page.key.address != ''">
+            and  address like '%' #{page.key.address} '%'
+        </if>
+    </select>
+
+   
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update sports
+        <set>
+            <if test="sportsName != null and sportsName != ''">
+                sports_name = #{sportsName},
+            </if>
+            <if test="address != null and address != ''">
+                address = #{address},
+            </if>
+            <if test="createdAt != null">
+                created_at = #{createdAt},
+            </if>
+            <if test="images != null and images != ''">
+                images = #{images},
+            </if>
+            <if test="createdBy != null and createdBy != ''">
+                created_by = #{createdBy},
+            </if>
+            <if test="startTime != null and startTime != ''">
+                start_time = #{startTime},
+            </if>
+            <if test="endTime != null and endTime != ''">
+                end_time = #{endTime},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete from sports where id = #{id}
+    </delete>
+    <!--获取体育馆下拉的数据-->
+   <select id="getSportsList" resultMap="SportsMap">
+       select * from sports where created_at is not null;
+   </select>
+</mapper>
+

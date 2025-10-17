@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.design.sportsAppointment.mapper.AppointmentMapper">
+
+    <resultMap type="com.design.sportsAppointment.pojo.Appointment" id="AppointmentMap">
+        <result property="id" column="id" jdbcType="INTEGER"/>
+        <result property="userId" column="user_id" jdbcType="INTEGER"/>
+        <result property="sportsName" column="sports_name" jdbcType="VARCHAR"/>
+        <result property="placeName" column="place_name" jdbcType="VARCHAR"/>
+        <result property="createdAt" column="created_at" jdbcType="TIMESTAMP"/>
+        <result property="createdBy" column="created_by" jdbcType="VARCHAR"/>
+        <result property="status" column="status" jdbcType="INTEGER"/>
+        <result property="deletedAt" column="deleted_at" jdbcType="TIMESTAMP"/>
+        <result property="prices" column="prices" jdbcType="NUMERIC"/>
+        <result property="telephone" column="telephone" jdbcType="VARCHAR"/>
+        <result property="month" column="month" jdbcType="VARCHAR"/>
+        <result property="timeQuantum" column="time_quantum" jdbcType="VARCHAR"/>
+        <result property="sum" column="sum" jdbcType="DOUBLE"/>
+        <result property="appointmentTime" column="appointment_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="AppointmentMap">
+        select
+          *
+        from appointment
+        where id = #{id}
+    </select>
+
+
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="id" useGeneratedKeys="true">
+        insert into appointment(user_id, sports_name, place_name, created_at, created_by, status, deleted_at, prices, telephone, appointment_time,time_quantum)
+        values (#{userId}, #{sportsName}, #{placeName}, now(), #{createdBy}, #{status}, #{deletedAt}, #{prices}, #{telephone}, #{appointmentTime},#{timeQuantum})
+    </insert>
+        <!--用select进行分页查询-->
+      <select id="getPageListByCondition" resultMap="AppointmentMap">
+        select *  from appointment where created_at is not null
+          <!--体育馆名称搜索 不为空 则进入搜索条件-->
+          <if test="page.key.sportsName != null and page.key.sportsName != ''">
+              and  sports_name  = #{page.key.sportsName}
+          </if>
+          <!--场地名称搜索 不为空 则进入搜索条件-->
+          <if test="page.key.placeName != null and page.key.placeName != ''">
+              and  place_name like '%' #{page.key.placeName} '%'
+          </if>
+          <!--手机号搜索 不为空 则进入搜索条件-->
+          <if test="page.key.telephone != null and page.key.telephone != ''">
+              and  telephone like '%' #{page.key.telephone} '%'
+          </if>
+          <!--预约人搜索 不为空 则进入搜索条件-->
+          <if test="page.key.createdBy != null and page.key.createdBy != ''">
+              and  created_by like '%' #{page.key.createdBy} '%'
+          </if>
+          <!--用户名Id搜索 不为空 则进入搜索条件-->
+          <if test="page.key.userId != null">
+              and  user_id = #{page.key.userId}
+          </if>
+          <!--预约时间搜索 不为空 则进入搜索条件-->
+          <if test="page.key.appointmentTime != null and page.key.appointmentTime != ''">
+              and appointment_time  like '%' #{page.key.appointmentTime} '%'
+          </if>
+            <!--排序 desc是降序-->
+        order by
+        created_at desc
+        <!--分页查询-->
+      
+        limit  #{page.startNum} , #{page.pageSize}
+    </select>
+     <!--分页查询条数-->
+    <select id="getPageListCount" resultType="int">
+        select count(id) as count from appointment where created_at is not null
+        <!--体育馆名称搜索 不为空 则进入搜索条件-->
+        <if test="page.key.sportsName != null and page.key.sportsName != ''">
+            and  sports_name  = #{page.key.sportsName}
+        </if>
+        <!--场地名称搜索 不为空 则进入搜索条件-->
+        <if test="page.key.placeName != null and page.key.placeName != ''">
+            and  place_name like '%' #{page.key.placeName} '%'
+        </if>
+        <!--手机号搜索 不为空 则进入搜索条件-->
+        <if test="page.key.telephone != null and page.key.telephone != ''">
+            and  telephone like '%' #{page.key.telephone} '%'
+        </if>
+        <!--预约人搜索 不为空 则进入搜索条件-->
+        <if test="page.key.createdBy != null and page.key.createdBy != ''">
+            and  created_by like '%' #{page.key.createdBy} '%'
+        </if>
+        <!--用户名Id搜索 不为空 则进入搜索条件-->
+        <if test="page.key.userId != null">
+            and  user_id = #{page.key.userId}
+        </if>
+        <!--预约时间搜索 不为空 则进入搜索条件-->
+        <if test="page.key.appointmentTime != null and page.key.appointmentTime != ''">
+            and appointment_time  like '%' #{page.key.appointmentTime} '%'
+        </if>
+    </select>
+
+   
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update appointment
+        <set>
+            <if test="userId != null">
+                user_id = #{userId},
+            </if>
+            <if test="sportsName != null and sportsName != ''">
+                sports_name = #{sportsName},
+            </if>
+            <if test="placeName != null and placeName != ''">
+                place_name = #{placeName},
+            </if>
+            <if test="createdAt != null">
+                created_at = #{createdAt},
+            </if>
+            <if test="createdBy != null and createdBy != ''">
+                created_by = #{createdBy},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="deletedAt != null">
+                deleted_at = #{deletedAt},
+            </if>
+            <if test="prices != null">
+                prices = #{prices},
+            </if>
+            <if test="timeQuantum != null and timeQuantum != ''">
+                time_quantum = #{timeQuantum},
+            </if>
+            <if test="telephone != null and telephone != ''">
+                telephone = #{telephone},
+            </if>
+            <if test="appointmentTime != null">
+                appointment_time = #{appointmentTime},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete from appointment where id = #{id}
+    </delete>
+    <!--根据用户id跟预约时间获取数据-->
+    <select id="getByUserAndDate" resultMap="AppointmentMap">
+        select * from appointment where  appointment_time=#{appointmentTime} and sports_name =#{sportsName} and place_name=#{placeName}and time_quantum=#{timeQuantum} and deleted_at is null;
+    </select>
+    <!--取消预约-->
+    <update id="cancel">
+        update appointment set deleted_at = now() , status=-1   where id =#{id}
+    </update>
+    <!--统计每月营业额-->
+    <select id="statisticsAnalyze" resultMap="AppointmentMap">
+        	 SELECT date_format(created_at, '%Y-%m') as month,SUM(prices) as sum
+        	  FROM appointment where status=1
+        <!--年份搜索 不为空 则进入搜索条件-->
+        <if test="page.key.year != null ">
+            and created_at  like '%' #{year} '%'
+        </if>
+          GROUP BY month;
+    </select>
+    <!--统计场地每月租借金额-->
+    <select id="getAppointmentTotalAnalyse" resultMap="AppointmentMap">
+        select sports_name, SUM(prices) as sum from appointment where status = 1
+        <!--年份搜索 不为空 则进入搜索条件-->
+        <if test="yearMonth == null or yearMonth ==''">
+            <bind name="pattern" value="'%' + year + '%'" />
+            and created_at like #{pattern}
+        </if>
+        <!--年份月份搜索 不为空 则进入搜索条件-->
+        <if test="yearMonth != null and yearMonth !=''">
+            <bind name="pattern" value="'%' + yearMonth + '%'" />
+            and created_at like #{pattern}
+        </if>
+        group by sports_name
+    </select>
+</mapper>
+
